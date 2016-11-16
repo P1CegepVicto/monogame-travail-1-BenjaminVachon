@@ -26,4 +26,7 @@ C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monoga
 C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monogame\Project1\bin\Windows\x86\Debug\Content\Background.jpg
 C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monogame\Project1\bin\Windows\x86\Debug\Content\Enemy.PNG
 C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monogame\Project1\bin\Windows\x86\Debug\Content\Hero.png
-C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monogame\Project1\bin\Windows\x86\Debug\Content\Projectile.png
+C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monogame\Project1\bin\Windows\x86\Debug\Content\Projectile1.png
+C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monogame\Project1\bin\Windows\x86\Debug\Content\Defeat.png
+C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monogame\Project1\bin\Windows\x86\Debug\Content\Projectile2.png
+C:\Users\benja\Documents\GitHub\monogame-travail-1-BenjaminVachon\Project_monogame\Project1\bin\Windows\x86\Debug\Content\Victory.png

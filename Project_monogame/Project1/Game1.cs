@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Threading;
 
 namespace Project1
 {
@@ -14,7 +15,10 @@ namespace Project1
         SpriteBatch spriteBatch;
         GameObject Hero;
         GameObject Enemy;
-        GameObject Projectile;
+        GameObject ProjectileH;
+        GameObject ProjectileE;
+        Texture2D Victory;
+        Texture2D Defeat;
         Rectangle fenetre;
         Texture2D Background;
         Random rng = new Random();
@@ -52,6 +56,10 @@ namespace Project1
             spriteBatch = new SpriteBatch(GraphicsDevice);
             //background
             Background = Content.Load<Texture2D>("Background.jpg");
+            //victoire
+            Victory = Content.Load<Texture2D>("Victory.png");
+            //défaite
+            Defeat = Content.Load<Texture2D>("Defeat.png");
             //hero
             Hero = new GameObject();
             Hero.estVivant = true;
@@ -65,11 +73,17 @@ namespace Project1
             Enemy.position.Y = fenetre.Top-10;
             Enemy.sprite = Content.Load<Texture2D>("Enemy.png");
             Enemy.vitesse.X = 5;
-            //projectile
-            Projectile = new GameObject();
-            Projectile.estVivant = false;
-            Projectile.sprite = Content.Load<Texture2D>("Projectile.png");
-            Projectile.vitesse.Y = 15;
+            //projectile1
+            ProjectileE = new GameObject();
+            ProjectileE.estVivant = false;
+            ProjectileE.sprite = Content.Load<Texture2D>("Projectile1.png");
+            ProjectileE.vitesse.Y = 15;
+            //projectile2
+            ProjectileH = new GameObject();
+            ProjectileH.estVivant = false;
+            ProjectileH.sprite = Content.Load<Texture2D>("Projectile2.png");
+            ProjectileH.vitesse.Y = -15;
+
             
             
             
@@ -95,6 +109,12 @@ namespace Project1
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            //Exit
+            if (Hero.estVivant == false || Enemy.estVivant == false)
+            {
+                Thread.Sleep(1500);
+                this.Exit();
+            }
             //déplacement
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             { 
@@ -143,18 +163,50 @@ namespace Project1
                 Enemy.vitesse.X += 7;
             }
             //attaque de l'enemy
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            if (Enemy.estVivant == true && ProjectileE.estVivant == false)
             {
-                Projectile.estVivant = true;
-                Projectile.position.X = Enemy.position.X;
-                Projectile.position.Y = Enemy.position.Y + 100;
+                ProjectileE.estVivant = true;
+                ProjectileE.position.X = Enemy.position.X;
+                ProjectileE.position.Y = Enemy.position.Y + 100;
             }
+            if (ProjectileE.position.Y >= fenetre.Bottom)
+            {
+                ProjectileE.estVivant = false;
+            }
+            if (Hero.position.X  <= ProjectileE.position.X+100 && Hero.position.X+225 >= ProjectileE.position.X)
+            {
+                if (Hero.position.Y+200 >= ProjectileE.position.Y && Hero.position.Y <= ProjectileE.position.Y)
+                {
+                    Hero.estVivant = false;
+                }
+            }
+            //attaque du Hero
+            if (Hero.estVivant == true && Keyboard.GetState().IsKeyDown(Keys.Space))
+            {
+                ProjectileH.estVivant = true;
+                ProjectileH.position.X = Hero.position.X+100;
+                ProjectileH.position.Y = Hero.position.Y+50;
+            }
+            if (ProjectileH.position.Y <= fenetre.Top)
+            {
+                ProjectileH.estVivant = false;
+            }
+            if (Enemy.position.X <= ProjectileH.position.X + 100 && Enemy.position.X + 225 >= ProjectileH.position.X)
+            {
+                if (Enemy.position.Y + 200 >= ProjectileH.position.Y && Enemy.position.Y <= ProjectileH.position.Y)
+                {
+                    Enemy.estVivant = false;
+                }
+            }
+
+
             rotate += 1;
             
-                // TODO: Add your update logic here
-                UpdateHero();
+            // TODO: Add your update logic here
+            UpdateHero();
             UpdateEnemy();
-            UpdateProjectile();
+            UpdateProjectileE();
+            UpdateProjectileH();
 
             base.Update(gameTime);
         }
@@ -166,10 +218,15 @@ namespace Project1
         {
             Enemy.position += Enemy.vitesse;
         }
-        public void UpdateProjectile()
+        public void UpdateProjectileE()
         {
-            Projectile.position += Projectile.vitesse;
+            ProjectileE.position += ProjectileE.vitesse;
         }
+        public void UpdateProjectileH()
+        {
+            ProjectileH.position += ProjectileH.vitesse;
+        }
+
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -189,14 +246,27 @@ namespace Project1
                 spriteBatch.Draw(Hero.sprite, Hero.position, Color.Red);
             }
             spriteBatch.Draw(Enemy.sprite, Enemy.position, Color.White);
-
-            if (Projectile.estVivant == true)
+            if (Enemy.estVivant == false)
             {
-                spriteBatch.Draw(Projectile.sprite, Projectile.position, rotation:rotate/7);
+                spriteBatch.Draw(Enemy.sprite, Enemy.position, Color.Red);
+            }
+            if (ProjectileE.estVivant == true)
+            {
+                spriteBatch.Draw(ProjectileE.sprite, ProjectileE.position, rotation: rotate / 7);
+            }
+            if (ProjectileH.estVivant == true)
+            {
+                spriteBatch.Draw(ProjectileH.sprite, ProjectileH.position, rotation: rotate / 7);
             }
 
-
-
+            if (Hero.estVivant == true && Enemy.estVivant == false)
+            {
+                spriteBatch.Draw(Victory, new Rectangle(0, 0, graphics.GraphicsDevice.DisplayMode.Width, graphics.GraphicsDevice.DisplayMode.Height), Color.White);
+            }
+            if (Hero.estVivant == false && Enemy.estVivant == true)
+            {
+                spriteBatch.Draw(Defeat, new Rectangle(0, 0, graphics.GraphicsDevice.DisplayMode.Width, graphics.GraphicsDevice.DisplayMode.Height), Color.White);
+            }
 
 
             spriteBatch.End();
