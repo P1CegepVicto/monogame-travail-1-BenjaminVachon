@@ -72,7 +72,7 @@ namespace Project1
             Enemy.position.X = fenetre.Center.X-100;
             Enemy.position.Y = fenetre.Top-10;
             Enemy.sprite = Content.Load<Texture2D>("Enemy.png");
-            Enemy.vitesse.X = 5;
+            Enemy.vitesse.X = 15;
             //projectile1
             ProjectileE = new GameObject();
             ProjectileE.estVivant = false;
@@ -156,11 +156,11 @@ namespace Project1
             //limite de map enemy et mouvement
             if (Enemy.position.X+150 >= fenetre.Right)
             {
-                Enemy.vitesse.X -= 7;
+                Enemy.vitesse.X = rng.Next(-20,-10);
             }
             if (Enemy.position.X-5 <= fenetre.Left)
             {
-                Enemy.vitesse.X += 7;
+                Enemy.vitesse.X = rng.Next(10,20);
             }
             //attaque de l'enemy
             if (Enemy.estVivant == true && ProjectileE.estVivant == false)
@@ -173,15 +173,15 @@ namespace Project1
             {
                 ProjectileE.estVivant = false;
             }
-            if (Hero.position.X  <= ProjectileE.position.X+100 && Hero.position.X+225 >= ProjectileE.position.X)
+            if (Hero.position.X+50  <= ProjectileE.position.X+100 && Hero.position.X+200 >= ProjectileE.position.X)
             {
-                if (Hero.position.Y+200 >= ProjectileE.position.Y && Hero.position.Y <= ProjectileE.position.Y)
+                if (Hero.position.Y+200 >= ProjectileE.position.Y && Hero.position.Y-25 <= ProjectileE.position.Y)
                 {
                     Hero.estVivant = false;
                 }
             }
             //attaque du Hero
-            if (Hero.estVivant == true && Keyboard.GetState().IsKeyDown(Keys.Space))
+            if (Hero.estVivant == true && Keyboard.GetState().IsKeyDown(Keys.Space) && ProjectileH.estVivant == false)
             {
                 ProjectileH.estVivant = true;
                 ProjectileH.position.X = Hero.position.X+100;
@@ -198,7 +198,14 @@ namespace Project1
                     Enemy.estVivant = false;
                 }
             }
-
+            //colision Hero-Enemy
+            if (Hero.position.X + 50 <= Enemy.position.X + 150 && Hero.position.X + 200 >= Enemy.position.X)
+            {
+                if (Hero.position.Y + 200 >= Enemy.position.Y && Hero.position.Y - 25 <= Enemy.position.Y)
+                {
+                    Hero.estVivant = false;
+                }
+            }
 
             rotate += 1;
             
@@ -256,7 +263,8 @@ namespace Project1
             }
             if (ProjectileH.estVivant == true)
             {
-                spriteBatch.Draw(ProjectileH.sprite, ProjectileH.position, rotation: rotate / 7);
+                spriteBatch.Draw(ProjectileH.sprite, ProjectileH.position, rotation: rotate / 7
+                    );
             }
 
             if (Hero.estVivant == true && Enemy.estVivant == false)
