@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System;
 
 namespace VachonBenjaminJeu3
@@ -13,7 +14,7 @@ namespace VachonBenjaminJeu3
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         GameObject Vaisseau;
-        GameObject[] Enemy = new GameObject[5];
+        GameObject[] Enemy = new GameObject[8];
         GameObject Projectile;
         GameObject Background;
         GameObject Background2;
@@ -21,6 +22,7 @@ namespace VachonBenjaminJeu3
         Rectangle Window;
         bool Gamestate;
         Random rng = new Random();
+        Song Song;
 
 
 
@@ -76,9 +78,8 @@ namespace VachonBenjaminJeu3
             {
                 Enemy[i] = new GameObject();
                 Enemy[i].estVivant = true;
-                Enemy[i].position.X = Window.Right - 150;
-                Enemy[i].position.Y = rng.Next(0, Window.Height - 80);
-                Enemy[i].vitesse.X = rng.Next(-16, -11);
+                Enemy[i].position.X = Window.Width - 150;
+                Enemy[i].position.Y = rng.Next(0, Window.Height - 80);                
                 if (rng.Next(0, 2) == 1)
                 {
                     Enemy[i].sprite = Content.Load<Texture2D>("Enemy2.png");
@@ -99,6 +100,10 @@ namespace VachonBenjaminJeu3
             Projectile.estVivant = false;
             Projectile.sprite = Content.Load<Texture2D>("Projectile.png");
             //son
+            //Song song = Content.Load<Song>("VIDE");
+            //MediaPlayer.IsRepeating = true;
+            //MediaPlayer.Volume = 0.25F;
+            //MediaPlayer.Play(song);
             //menu
             Gamestate = false;
 
@@ -134,6 +139,10 @@ namespace VachonBenjaminJeu3
             }
             if (Gamestate == true)
             {
+                for (int i = Enemy.Length - 1; i >= 0; i--)
+                {
+                    Enemy[i].vitesse.X = rng.Next(-16, -11);
+                }
                 //Quitter
                 if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 {
@@ -185,7 +194,7 @@ namespace VachonBenjaminJeu3
                 //Border Enemy
                 for (int i = Enemy.Length - 1; i >= 0; i--)
                 {
-                    if (Enemy[i].position.X >= Window.Left)
+                    if (Enemy[i].position.X <= Window.Left)
                     {
                         Enemy[i].estVivant = false;
                     }

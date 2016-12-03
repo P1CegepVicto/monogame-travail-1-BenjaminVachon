@@ -57,7 +57,7 @@ namespace Formatif3
                 }
                 if (touche.ToLower() == "p")
                 {
-
+                    
                 }
                 if (touche.ToLower() == "a")
                 {
