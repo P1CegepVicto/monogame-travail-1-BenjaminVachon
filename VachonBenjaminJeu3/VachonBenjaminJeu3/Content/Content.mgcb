@@ -13,9 +13,21 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin mix.mp3
+#begin Sunny.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
 /processorParam:Quality=Best
-/build:mix.mp3
+/build:Sunny.mp3
+
+#begin Sad.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sad.mp3
+
+#begin Knockout.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Knockout.mp3
 

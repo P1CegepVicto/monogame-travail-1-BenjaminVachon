@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
+using System.Threading;
 
 namespace VachonBenjaminJeu3
 {
@@ -15,14 +17,22 @@ namespace VachonBenjaminJeu3
         SpriteBatch spriteBatch;
         GameObject Vaisseau;
         GameObject[] Enemy = new GameObject[8];
-        GameObject Projectile;
+        GameObject[] Projectile = new GameObject[2];
         GameObject Background;
         GameObject Background2;
         GameObject Menu;
         Rectangle Window;
         bool Gamestate;
+        bool MenuOver = false;
         Random rng = new Random();
         Song Song;
+        SoundEffect SonKnockout;
+        SoundEffect SonDeath;
+        SoundEffectInstance Knockout;
+        SoundEffectInstance Death;
+        SpriteFont text;
+        double score;
+        double temps;
 
 
 
@@ -79,7 +89,7 @@ namespace VachonBenjaminJeu3
                 Enemy[i] = new GameObject();
                 Enemy[i].estVivant = true;
                 Enemy[i].position.X = Window.Width - 150;
-                Enemy[i].position.Y = rng.Next(0, Window.Height - 80);                
+                Enemy[i].position.Y = rng.Next(0, Window.Height - 80);
                 if (rng.Next(0, 2) == 1)
                 {
                     Enemy[i].sprite = Content.Load<Texture2D>("Enemy2.png");
@@ -96,14 +106,30 @@ namespace VachonBenjaminJeu3
             Vaisseau.position.Y = Window.Center.Y;
             Vaisseau.sprite = Content.Load<Texture2D>("Vaisseau.png");
             //Projectile
-            Projectile = new GameObject();
-            Projectile.estVivant = false;
-            Projectile.sprite = Content.Load<Texture2D>("Projectile.png");
+            for (int i = 0; i < Projectile.Length; i++)
+            {
+                Projectile[i] = new GameObject();
+                Projectile[i].estVivant = false;
+                if (rng.Next(0, 2) == 1)
+                {
+                    Projectile[i].sprite = Content.Load<Texture2D>("Projectile.png");
+                }
+                else
+                {
+                    Projectile[i].sprite = Content.Load<Texture2D>("Projectile2.png");
+                }
+            }
             //son
-            //Song song = Content.Load<Song>("VIDE");
-            //MediaPlayer.IsRepeating = true;
-            //MediaPlayer.Volume = 0.25F;
-            //MediaPlayer.Play(song);
+            Song song = Content.Load<Song>("Sunny");
+            MediaPlayer.IsRepeating = true;
+            MediaPlayer.Volume = 0.40F;
+            MediaPlayer.Play(song);
+            SonDeath = Content.Load<SoundEffect>("Sad");
+            Death = SonDeath.CreateInstance();
+            SonKnockout = Content.Load<SoundEffect>("Knockout");
+            Knockout = SonKnockout.CreateInstance();
+            //Texte
+            text = Content.Load<SpriteFont>("Font");
             //menu
             Gamestate = false;
 
@@ -131,6 +157,16 @@ namespace VachonBenjaminJeu3
                 {
                     Gamestate = true;
                     Menu.estVivant = false;
+                    Vaisseau.estVivant = true;
+                    MenuOver = false;
+                    Death.Stop();
+                    MediaPlayer.Resume();
+                    for (int i = Enemy.Length - 1; i >= 0; i--)
+                    {
+                        Enemy[i].estVivant = true;
+                        Enemy[i].position.X = Window.Width - 150;
+                        Enemy[i].position.Y = rng.Next(0, Window.Height - 80);
+                    }
                 }
                 if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 {
@@ -138,7 +174,7 @@ namespace VachonBenjaminJeu3
                 }
             }
             if (Gamestate == true)
-            {
+            {                              
                 for (int i = Enemy.Length - 1; i >= 0; i--)
                 {
                     Enemy[i].vitesse.X = rng.Next(-16, -11);
@@ -150,26 +186,43 @@ namespace VachonBenjaminJeu3
                     Menu.estVivant = true;
                 }
                 //Movement Vaisseau
+                Vaisseau.vitesse.Y = 0;
                 if (Keyboard.GetState().IsKeyDown(Keys.W))
                 {
-                    Vaisseau.vitesse.Y = -8;
-                }
+                    Vaisseau.vitesse.Y = -11;
+                }                          
                 if (Keyboard.GetState().IsKeyDown(Keys.S))
                 {
-                    Vaisseau.vitesse.Y = 8;
+                    Vaisseau.vitesse.Y = 11;
                 }
-                //tir vaisseau
-                if (Keyboard.GetState().IsKeyDown(Keys.Space) && Projectile.estVivant == false && Vaisseau.estVivant == true)
+                //tir vaisseau  
+                if (rng.Next(0, 2) == 1)
                 {
-                    Projectile.estVivant = true;
-                    Projectile.position.X = Vaisseau.position.X + 255;
-                    Projectile.position.Y = Vaisseau.position.Y + 102;
-                    Projectile.vitesse.X = 50;
+                    if (Keyboard.GetState().IsKeyDown(Keys.Space) && Projectile[0].estVivant == false && Vaisseau.estVivant == true)
+                    {
+                        Projectile[0].estVivant = true;
+                        Projectile[0].position.X = Vaisseau.position.X + 255;
+                        Projectile[0].position.Y = Vaisseau.position.Y + 102;
+                        Projectile[0].vitesse.X = 50;
+                    }
                 }
-                if (Projectile.position.X >= Window.Width)
+                else
                 {
-                    Projectile.estVivant = false;
-                    Projectile.vitesse.X = 0;
+                    if (Keyboard.GetState().IsKeyDown(Keys.Space) && Projectile[1].estVivant == false && Vaisseau.estVivant == true)
+                    {
+                        Projectile[1].estVivant = true;
+                        Projectile[1].position.X = Vaisseau.position.X + 255;
+                        Projectile[1].position.Y = Vaisseau.position.Y + 102;
+                        Projectile[1].vitesse.X = 50;
+                    }
+                }
+                for (int i = 0; i < Projectile.Length; i++)
+                {
+                    if (Projectile[i].position.X >= Window.Width)
+                    {
+                        Projectile[i].estVivant = false;
+                        Projectile[i].vitesse.X = 0;
+                    }
                 }
                 //Border Vaisseau
                 if (Vaisseau.position.Y + 227 >= Window.Bottom)
@@ -200,7 +253,66 @@ namespace VachonBenjaminJeu3
                     }
                 }
             }
-
+            //mort vaisseau
+            for (int i = Enemy.Length - 1; i >= 0; i--)
+            {
+                if (this.Vaisseau.GetRekt().Intersects(this.Enemy[i].GetRekt()))
+                {
+                    Vaisseau.estVivant = false;
+                    MenuOver = true;
+                    Menu.estVivant = true;
+                    Gamestate = false;
+                    Enemy[i].estVivant = false;
+                    MediaPlayer.Pause();
+                    Death.Play();              
+                }
+            }
+            //Border Enemy & respawn
+            for (int i = Enemy.Length - 1; i >= 0; i--)
+            {
+                if (Enemy[i].estVivant == true && Enemy[i].position.X <= Window.Left)
+                {
+                    Enemy[i].estVivant = false;
+                    Enemy[i].position.X = Window.Width - 150;
+                    Enemy[i].position.Y = rng.Next(0, Window.Height - 80);
+                }
+                if (Enemy[i].estVivant == false)
+                {
+                    Enemy[i].estVivant = true;
+                    Enemy[i].position.X = Window.Width - 150;
+                    Enemy[i].position.Y = rng.Next(0, Window.Height - 80);
+                }
+            }
+            //Mort Enemy & projectile
+            for (int i = Enemy.Length - 1; i >= 0; i--)
+            {
+                for (int i2 = Projectile.Length - 1; i2 >= 0; i2--)
+                {
+                    if (this.Projectile[i2].GetRekt().Intersects(this.Enemy[i].GetRekt()))
+                    {
+                        Enemy[i].estVivant = false;
+                        Projectile[i2].estVivant = false;
+                        MediaPlayer.Pause();
+                        Knockout.Play();
+                        Knockout.Volume = 0.50F;
+                        MediaPlayer.Resume();
+                    }
+                }
+            }
+            //GameOver
+            if (Gamestate == false && MenuOver == true)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                {
+                    this.Exit();
+                }
+                if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                {
+                    Gamestate = true;
+                    Menu.estVivant = false;
+                    MenuOver = false;
+                }
+            }
 
             base.Update(gameTime);
             UpdateBackground();
@@ -224,7 +336,10 @@ namespace VachonBenjaminJeu3
         }
         public void UpdateProjectile()
         {
-            Projectile.position += Projectile.vitesse;
+            for (int i = 0; i < Projectile.Length; i++)
+            {
+                Projectile[i].position += Projectile[i].vitesse;
+            }
         }
         public void UpdateEnemy()
         {
@@ -248,6 +363,10 @@ namespace VachonBenjaminJeu3
             {
                 spriteBatch.Draw(Menu.sprite, Menu.position);
             }
+            if (MenuOver == true)
+            {
+                spriteBatch.DrawString(text, "Play again ?", new Vector2(Window.Center.X - 100, Window.Bottom - 250), Color.White);
+            }
             //Jeu
             if (Gamestate == true)
             {
@@ -262,16 +381,32 @@ namespace VachonBenjaminJeu3
                         spriteBatch.Draw(Enemy[i].sprite, Enemy[i].position);
                     }
                 }
-                //Vaisseau  
+                //Vaisseau 
+                
                 if (Vaisseau.estVivant == true)
                 {
                     spriteBatch.Draw(Vaisseau.sprite, Vaisseau.position);
-                    if (Projectile.estVivant == true)
+                for (int i = 0; i < Projectile.Length; i++)
+                {
+                    if (Projectile[i].estVivant == true)
                     {
-                        spriteBatch.Draw(Projectile.sprite, Projectile.position);
+                        spriteBatch.Draw(Projectile[i].sprite, Projectile[i].position);
                     }
                 }
-            }
+                }
+
+                //texte
+                if (Gamestate == true)
+                {
+                    temps = gameTime.TotalGameTime.Seconds;
+                    score = 15 * temps - gameTime.TotalGameTime.Seconds;
+                    spriteBatch.DrawString(text, score.ToString(), new Vector2(50, 50), Color.Black);
+                }
+                else
+                {
+                    score = 0;
+                }
+            }            
             spriteBatch.End();
             base.Draw(gameTime);
         }
