@@ -33,6 +33,7 @@ namespace VachonBenjaminJeu3
         SpriteFont text;
         double score;
         double temps;
+        double kills = 0;
 
 
 
@@ -76,7 +77,7 @@ namespace VachonBenjaminJeu3
             Background2.sprite = Content.Load<Texture2D>("Galaxy.jpg");
             Background2.position.X = 2880;
             Background2.position.Y = 0;
-            Background2.vitesse.X = -15;
+            Background2.vitesse.X = -13;
             //Menu
             Menu = new GameObject();
             Menu.sprite = Content.Load<Texture2D>("Play.png");
@@ -110,7 +111,7 @@ namespace VachonBenjaminJeu3
             {
                 Projectile[i] = new GameObject();
                 Projectile[i].estVivant = false;
-                if (rng.Next(0, 2) == 1)
+                if (i == 1)
                 {
                     Projectile[i].sprite = Content.Load<Texture2D>("Projectile.png");
                 }
@@ -158,7 +159,13 @@ namespace VachonBenjaminJeu3
                     Gamestate = true;
                     Menu.estVivant = false;
                     Vaisseau.estVivant = true;
-                    MenuOver = false;
+                    MenuOver = false;                   
+                    Background.position.X = 0;
+                    Background.position.Y = 0;
+                    Background.vitesse.X = -15;                   
+                    Background2.position.X = 2880;
+                    Background2.position.Y = 0;
+                    Background2.vitesse.X = -15;
                     Death.Stop();
                     MediaPlayer.Resume();
                     for (int i = Enemy.Length - 1; i >= 0; i--)
@@ -195,6 +202,7 @@ namespace VachonBenjaminJeu3
                 {
                     Vaisseau.vitesse.Y = 11;
                 }
+
                 //tir vaisseau  
                 if (rng.Next(0, 2) == 1)
                 {
@@ -203,7 +211,7 @@ namespace VachonBenjaminJeu3
                         Projectile[0].estVivant = true;
                         Projectile[0].position.X = Vaisseau.position.X + 255;
                         Projectile[0].position.Y = Vaisseau.position.Y + 102;
-                        Projectile[0].vitesse.X = 50;
+                        Projectile[0].vitesse.X = 75;
                     }
                 }
                 else
@@ -264,7 +272,8 @@ namespace VachonBenjaminJeu3
                     Gamestate = false;
                     Enemy[i].estVivant = false;
                     MediaPlayer.Pause();
-                    Death.Play();              
+                    Death.Play();
+                    kills = 0;             
                 }
             }
             //Border Enemy & respawn
@@ -294,8 +303,9 @@ namespace VachonBenjaminJeu3
                         Projectile[i2].estVivant = false;
                         MediaPlayer.Pause();
                         Knockout.Play();
-                        Knockout.Volume = 0.50F;
+                        Knockout.Volume = 0.15F;
                         MediaPlayer.Resume();
+                        kills++;
                     }
                 }
             }
@@ -398,9 +408,9 @@ namespace VachonBenjaminJeu3
                 //texte
                 if (Gamestate == true)
                 {
-                    temps = gameTime.TotalGameTime.Seconds;
-                    score = 15 * temps - gameTime.TotalGameTime.Seconds;
-                    spriteBatch.DrawString(text, score.ToString(), new Vector2(50, 50), Color.Black);
+                    
+                    score = 15 * kills;
+                    spriteBatch.DrawString(text, score.ToString(), new Vector2(50, 50), Color.White);
                 }
                 else
                 {
