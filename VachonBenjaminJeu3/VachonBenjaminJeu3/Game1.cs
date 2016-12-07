@@ -28,12 +28,13 @@ namespace VachonBenjaminJeu3
         Song Song;
         SoundEffect SonKnockout;
         SoundEffect SonDeath;
+        SoundEffect SonTir;
         SoundEffectInstance Knockout;
         SoundEffectInstance Death;
+        SoundEffectInstance Tir;
         SpriteFont text;
-        double score;
-        double temps;
         double kills = 0;
+        double score = 0;
 
 
 
@@ -129,6 +130,8 @@ namespace VachonBenjaminJeu3
             Death = SonDeath.CreateInstance();
             SonKnockout = Content.Load<SoundEffect>("Knockout");
             Knockout = SonKnockout.CreateInstance();
+            SonTir = Content.Load<SoundEffect>("Tir");
+            Tir = SonTir.CreateInstance();
             //Texte
             text = Content.Load<SpriteFont>("Font");
             //menu
@@ -184,7 +187,7 @@ namespace VachonBenjaminJeu3
             {                              
                 for (int i = Enemy.Length - 1; i >= 0; i--)
                 {
-                    Enemy[i].vitesse.X = rng.Next(-16, -11);
+                    Enemy[i].vitesse.X = rng.Next(-21, -17);
                 }
                 //Quitter
                 if (Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -212,6 +215,8 @@ namespace VachonBenjaminJeu3
                         Projectile[0].position.X = Vaisseau.position.X + 255;
                         Projectile[0].position.Y = Vaisseau.position.Y + 102;
                         Projectile[0].vitesse.X = 75;
+                        Tir.Play();
+                        Tir.Volume = 0.25F;
                     }
                 }
                 else
@@ -264,7 +269,7 @@ namespace VachonBenjaminJeu3
             //mort vaisseau
             for (int i = Enemy.Length - 1; i >= 0; i--)
             {
-                if (this.Vaisseau.GetRekt().Intersects(this.Enemy[i].GetRekt()))
+                if (this.Vaisseau.GetRekt().Intersects(this.Enemy[i].GetRekt()) && Enemy[i].estVivant == true)
                 {
                     Vaisseau.estVivant = false;
                     MenuOver = true;
@@ -285,7 +290,7 @@ namespace VachonBenjaminJeu3
                     Enemy[i].position.X = Window.Width - 150;
                     Enemy[i].position.Y = rng.Next(0, Window.Height - 80);
                 }
-                if (Enemy[i].estVivant == false)
+                if (Enemy[i].estVivant == false && gameTime.TotalGameTime.Seconds % 3 == 0)
                 {
                     Enemy[i].estVivant = true;
                     Enemy[i].position.X = Window.Width - 150;
@@ -297,13 +302,13 @@ namespace VachonBenjaminJeu3
             {
                 for (int i2 = Projectile.Length - 1; i2 >= 0; i2--)
                 {
-                    if (this.Projectile[i2].GetRekt().Intersects(this.Enemy[i].GetRekt()))
+                    if (this.Projectile[i2].GetRekt().Intersects(this.Enemy[i].GetRekt()) && Enemy[i].estVivant == true)
                     {
                         Enemy[i].estVivant = false;
                         Projectile[i2].estVivant = false;
                         MediaPlayer.Pause();
                         Knockout.Play();
-                        Knockout.Volume = 0.15F;
+                        Knockout.Volume = 0.40F;
                         MediaPlayer.Resume();
                         kills++;
                     }
@@ -358,8 +363,6 @@ namespace VachonBenjaminJeu3
                 Enemy[i].position += Enemy[i].vitesse;
             }
         }
-
-
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -390,12 +393,26 @@ namespace VachonBenjaminJeu3
                     {
                         spriteBatch.Draw(Enemy[i].sprite, Enemy[i].position);
                     }
+                    if (Enemy[i].estVivant == false)
+                    {
+                        Enemy[i].sprite = Content.Load<Texture2D>("Death.png");
+                        spriteBatch.Draw(Enemy[i].sprite, Enemy[i].position);
+                        if (rng.Next(0, 2) == 1)
+                        {
+                            Enemy[i].sprite = Content.Load<Texture2D>("Enemy2.png");
+                        }
+                        else
+                        {
+                            Enemy[i].sprite = Content.Load<Texture2D>("Enemy1.png");
+                        }
+                    }
                 }
                 //Vaisseau 
                 
                 if (Vaisseau.estVivant == true)
                 {
                     spriteBatch.Draw(Vaisseau.sprite, Vaisseau.position);
+                //projectile
                 for (int i = 0; i < Projectile.Length; i++)
                 {
                     if (Projectile[i].estVivant == true)
@@ -403,18 +420,28 @@ namespace VachonBenjaminJeu3
                         spriteBatch.Draw(Projectile[i].sprite, Projectile[i].position);
                     }
                 }
+                //Vaisseau Mort
+                if (Vaisseau.estVivant == false)
+                    {
+                        Vaisseau.sprite = Content.Load<Texture2D>("DeathV.png");
+                        spriteBatch.Draw(Vaisseau.sprite, Vaisseau.position);
+                        Vaisseau.sprite = Content.Load<Texture2D>("Vaisseau.png");
+                    }
                 }
 
                 //texte
                 if (Gamestate == true)
-                {
-                    
-                    score = 15 * kills;
-                    spriteBatch.DrawString(text, score.ToString(), new Vector2(50, 50), Color.White);
+                {    
+                    if (score < kills)
+                    {
+                        score = kills;
+                    }                           
+                    spriteBatch.DrawString(text, kills.ToString(), new Vector2(50, 50), Color.White);
+                    spriteBatch.DrawString(text, "highscore : " + score.ToString(), new Vector2(300, 50), Color.White);
                 }
                 else
                 {
-                    score = 0;
+                    kills = 0;
                 }
             }            
             spriteBatch.End();

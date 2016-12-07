@@ -31,3 +31,9 @@
 /processorParam:Quality=Best
 /build:Knockout.mp3
 
+#begin Tir.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Tir.mp3
+
